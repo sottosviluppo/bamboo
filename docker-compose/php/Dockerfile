@@ -1,7 +1,13 @@
 FROM php:7.2-apache
+
 RUN a2enmod rewrite
 
-RUN apt-get update && apt-get install -y \
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/security.debian.org/d' /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
+# Install dependencies
+RUN set -ex && apt-get update && apt-get install -y \
         git \
         unzip \
         libfreetype6-dev \
@@ -10,23 +16,27 @@ RUN apt-get update && apt-get install -y \
         libicu-dev \
         libcurl4-openssl-dev \
         libxml2-dev \
-        libonig-dev \
         libzip-dev \
-    && docker-php-ext-configure \
-               gd --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-freetype-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql intl mbstring curl xml zip bcmath soap
+        libxslt1-dev \
+        zlib1g-dev \
+        pkg-config \
+        libreadline-dev \
+        libssl-dev \
+        libedit-dev \
+    && docker-php-ext-configure gd \
+        --with-freetype-dir=/usr/include/ \
+        --with-jpeg-dir=/usr/include/ \
+        --with-png-dir=/usr/include/ \
+    && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql intl mbstring curl xml zip bcmath soap \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-#RUN docker-php/-ext-configure \
- #       gd --with-gd --with-png-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-freetype-dir=/usr/include/
-
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer --version
+# Composer v1 install (specifico)
+RUN curl -sS https://getcomposer.org/installer | php -- --version=1.10.27 --install-dir=/usr/local/bin --filename=composer
 
 # Set timezone
 RUN rm /etc/localtime
 RUN ln -s /usr/share/zoneinfo/Europe/Rome /etc/localtime
 RUN "date"
 
-# RUN echo "http://192.168.14.11/owncloud/remot:q!e.php/webdav /var/www/edilfoto/owncloud:q!:wq:wq: davfs rw,user,noauto 0 0" >> /etc/fstab
-# RUN ::wq
 WORKDIR /var/www/bamboo
