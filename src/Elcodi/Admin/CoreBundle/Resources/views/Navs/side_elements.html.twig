@@ -1,3 +1,7 @@
+{# <style type="text/css">
+.parent-row { display:flex; align-items:center; justify-content:space-between; }
+</style> #}
+
 {% macro showNodes(menu, tag, route) %}
     {% import _self as side_elements %}
     {% set nodes = menu.getSubnodesByTag(tag) %}
@@ -6,47 +10,70 @@
     {% endfor %}
 {% endmacro %}
 
-
 {% macro showNode(node, route) %}
-    <li class="{% if node.isActive(route) %}active{% endif %}{% if node.subnodes|length %}parent{% endif %}" data-test="{{ node.name }}">
-    {% if node.subnodes|length == 0 %}
+    {# Preparo URL e id del sottomenu #}
+    {% set has_children = node.subnodes|length > 0 %}
+    {% set node_url = null %}
+    {% if node.url %}
         {% set node_url = node.url is iterable
             ? path(node.url[0], node.url[1])
             : path(node.url)
         %}
-        <a href="{{ node_url }}">
-    {% else %}
-        <a href="#{{ node.name|md5 }}" data-fc-modules="toggle">
-            <i class="icon-caret-down fl-r"></i>
     {% endif %}
-    {% if node.warnings is not null %}<span class="badge{% if node.warnings > 0 %} badge-alert{% endif %}">{{ node.warnings }}</span>{% endif %}
-            <span class="mobile tablet">
-                <i class="icon-{{ node.code|default("folder") }} fz-xl va-m mr-s"></i>
-                <span>{{ node.name|trans }}</span>
-            </span>
-            <span class="desktop">
-                <i class="icon-{{ node.code|default("folder") }} mr-m"></i>
-                {{ node.name|trans }}
-            </span>
-        </a>
-        {% for subnode in node.subnodes %}
-            {% if loop.first %}
-                <ul id="{{ node.name|md5 }}" {% if not node.isExpanded(route) %}class="hidden"{% endif %}>
+    {% set submenu_id = node.name|md5 %}
+
+    <li class="{% if node.isActive(route) %}active{% endif %}{% if has_children %} parent{% endif %}" data-test="{{ node.name }}">
+        <div class="parent-row" style="display:flex; align-items:center; justify-content:space-between;">
+            {# LINK PRINCIPALE: sempre naviga (se esiste un URL) #}
+            {% if node_url %}
+                <a href="{{ node_url }}" class="parent-link" style="width: 90%">
+            {% else %}
+                <a href="#{{ submenu_id }}" class="parent-link" onclick="event.preventDefault()">
             {% endif %}
-            <li {% if subnode.isActive(route) %}class="active"{% endif %} data-test="{{ subnode.name }}">
-                {% set subnode_url = subnode.url is iterable
-                    ? path(subnode.url[0], subnode.url[1])
-                    : path(subnode.url)
-                %}
-                <a href="{{ subnode_url }}" class="pl-l"><i class="icon-angle-right"></i> {{ subnode.name|trans }}</a>
-            </li>
-            {% if loop.last %}
-                </ul>
+
+            {% if node.warnings is not null %}
+                <span class="badge{% if node.warnings > 0 %} badge-alert{% endif %}">{{ node.warnings }}</span>
             {% endif %}
-        {% endfor %}
+
+                <span class="mobile tablet">
+                    <i class="icon-{{ node.code|default('folder') }} fz-xl va-m mr-s" ></i>
+                    <span>{{ node.name|trans }}</span>
+                </span>
+                <span class="desktop">
+                    <i class="icon-{{ node.code|default('folder') }} mr-m" ></i>
+                    {{ node.name|trans }}
+                </span>
+                </a>
+
+            {# TOGGLE SEPARATO: apre/chiude il sottomenu senza navigare #}
+            {% if has_children %}
+                <a href="#{{ submenu_id }}"
+                   class="caret-toggle"
+                   data-fc-modules="toggle"
+                   aria-controls="{{ submenu_id }}"
+                   aria-expanded="{{ node.isExpanded(route) ? 'true' : 'false' }}"
+                   onclick="event.preventDefault()">
+                    <i class="icon-caret-down fl-r" style="line-height:1.5rem"></i>
+                </a>
+            {% endif %}
+        </div>
+
+        {# SOTTOMENU #}
+        {% if has_children %}
+            <ul id="{{ submenu_id }}" {% if not node.isExpanded(route) %}class="hidden"{% endif %}>
+                {% for subnode in node.subnodes %}
+                    <li {% if subnode.isActive(route) %}class="active"{% endif %} data-test="{{ subnode.name }}">
+                        {% set subnode_url = subnode.url is iterable
+                            ? path(subnode.url[0], subnode.url[1])
+                            : path(subnode.url)
+                        %}
+                        <a href="{{ subnode_url }}" class="pl-l"><i class="icon-angle-right"></i> {{ subnode.name|trans }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </li>
 {% endmacro %}
-
 
 {% macro separator() %}
     <li class="pt-s">

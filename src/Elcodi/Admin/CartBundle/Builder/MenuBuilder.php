@@ -67,7 +67,7 @@ class MenuBuilder extends AbstractMenuBuilder implements MenuBuilderInterface
         if ($this->permissions['canRead']) {
             $node
                 ->setCode('shopping-cart')
-                ->setUrl('admin_order_list')
+                ->setUrl('admin_order_list_paid')
                 ->setTag('order')
                 ->setPriority(16)
 
