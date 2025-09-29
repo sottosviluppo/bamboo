@@ -62,6 +62,7 @@ class CartPaidEventListener
      */
     public function transformCartToOrder(AbstractPaymentEvent $event)
     {
+        
         $cart = $this
             ->cartWrapper
             ->get();
