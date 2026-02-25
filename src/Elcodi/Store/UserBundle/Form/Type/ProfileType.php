@@ -22,6 +22,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Elcodi\Component\Core\Factory\Traits\FactoryTrait;
+use Symfony\Component\Validator\Constraints\Email;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 /**
  * Class ProfileType
@@ -46,6 +49,7 @@ class ProfileType extends AbstractType
             'data_class' => $this
                 ->factory
                 ->getEntityNamespace(),
+            'validation_groups' => ['profile_edit'], 
         ]);
     }
 
@@ -62,14 +66,17 @@ class ProfileType extends AbstractType
             ->add('firstname', 'text', [
                 'required' => true,
                 'label'    => 'store.user.form.fields.firstname.label',
+                'constraints' => [new NotBlank(), new NotNull()],
             ])
             ->add('lastname', 'text', [
                 'required' => true,
                 'label'    => 'store.user.form.fields.lastname.label',
+                'constraints' => [new NotBlank(), new NotNull()],
             ])
             ->add('email', 'email', [
                 'required' => true,
                 'label'    => 'store.user.form.fields.email.label',
+                'constraints' => [new NotBlank(), new NotNull(), new Email()],
             ])
             ->add('password', 'repeated', [
                 'type'           => 'password',
