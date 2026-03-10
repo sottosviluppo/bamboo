@@ -154,24 +154,16 @@ class ShippingRangesProvider
         ShippingRangeInterface $shippingRange
     ) {
         $cartPrice = $cart->getPurchasableAmount();
+        if ($cartPrice === null) {
+            return true;
+        }
         $cartPriceCurrency = $cartPrice->getCurrency();
         $shippingRangeFromPrice = $shippingRange->getFromPrice();
         $shippingRangeToPrice = $shippingRange->getToPrice();
 
-        return
-        $this->isShippingRangeCountrySatisfiedByCart($cart, $shippingRange) &&
-            (
-            $this
-                ->currencyConverter
-                ->convertMoney($shippingRangeFromPrice, $cartPriceCurrency)
-                ->compareTo($cartPrice) <= 0
-        ) &&
-            (
-            $this
-                ->currencyConverter
-                ->convertMoney($shippingRangeToPrice, $cartPriceCurrency)
-                ->compareTo($cartPrice) > 0
-        );
+        return $this->isShippingRangeCountrySatisfiedByCart($cart, $shippingRange) &&
+            ($this->currencyConverter->convertMoney($shippingRangeFromPrice, $cartPriceCurrency)->compareTo($cartPrice) <= 0) &&
+            ($this->currencyConverter->convertMoney($shippingRangeToPrice, $cartPriceCurrency)->compareTo($cartPrice) > 0);
     }
 
     /**
@@ -198,14 +190,9 @@ class ShippingRangesProvider
             return true;
         }
 
-        return
-        $this->isShippingRangeCountrySatisfiedByCart($cart, $shippingRange) &&
-        is_numeric($cartRangeFromWeight) &&
-        is_numeric($cartRangeToWeight) &&
-        $cartRangeFromWeight >= 0 &&
-        $cartRangeToWeight >= 0 &&
-        $cartWeight >= $cartRangeFromWeight &&
-        $cartWeight < $cartRangeToWeight;
+        return $this->isShippingRangeCountrySatisfiedByCart($cart, $shippingRange) && is_numeric($cartRangeFromWeight) &&
+        is_numeric($cartRangeToWeight) && $cartRangeFromWeight >= 0 && $cartRangeToWeight >= 0 &&
+        $cartWeight >= $cartRangeFromWeight && $cartWeight < $cartRangeToWeight;
     }
 
     private function isShippingRangeCountrySatisfiedByCart(
@@ -217,7 +204,8 @@ class ShippingRangesProvider
         }
 
         // per ora: se non ho un indirizzo con country e il shipping range è italia lo inserisco.
-        $defaultResult = $shippingRange->getCountry()->getId() == 1;
+        $country = $shippingRange->getCountry();
+        $defaultResult = $country->getId() == 1;
 
         $deliveryAddress = $cart->getDeliveryAddress();
         if ($deliveryAddress === null) {
@@ -228,7 +216,7 @@ class ShippingRangesProvider
             return $defaultResult;
         }
 
-        if ($shippingRange->getCountry()->getId() == $deliveryAddress->getCountry()->getId()) {
+        if ($country->getId() == $deliveryAddress->getCountry()->getId()) {
             return true;
         }
 
