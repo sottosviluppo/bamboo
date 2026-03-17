@@ -35,8 +35,17 @@ RUN set -ex && apt-get update && apt-get install -y \
 RUN curl -sS https://getcomposer.org/installer | php -- --version=1.10.27 --install-dir=/usr/local/bin --filename=composer
 
 # Set timezone
-RUN rm /etc/localtime
-RUN ln -s /usr/share/zoneinfo/Europe/Rome /etc/localtime
-RUN "date"
+RUN rm /etc/localtime && \
+    ln -s /usr/share/zoneinfo/Europe/Rome /etc/localtime
 
 WORKDIR /var/www/bamboo
+
+# Fix permessi: www-data (UID 33) è l'utente di Apache
+# Creiamo le cartelle critiche di Symfony e le assegniamo a www-data.
+# I permessi vengono applicati all'avvio tramite entrypoint, perché
+# le cartelle sono sovrascritte dal bind mount del volume dopo il build.
+COPY docker-compose/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["apache2-foreground"]
