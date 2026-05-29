@@ -42,3 +42,10 @@ services:
         class: Twig_Extensions_Extension_Intl
         tags:
             - { name: twig.extension }
+
+    elcodi_store.event_listener.not_found_redirect:
+        class: Elcodi\Store\CoreBundle\EventListener\NotFoundRedirectEventListener
+        arguments:
+            - "@router"
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, method: onKernelException, priority: 10 }

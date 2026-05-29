@@ -9,4 +9,4 @@ services:
             - "@elcodi.store"
             - store.error.store_is_disabled
         tags:
-            - { name: firewall_listener, firewall: %bamboo_store_firewall%, priority: -16 }
+            - { name: firewall_listener, firewall: "%bamboo_store_firewall%", priority: -16 }
