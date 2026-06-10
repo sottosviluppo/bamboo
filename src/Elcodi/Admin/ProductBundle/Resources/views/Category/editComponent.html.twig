@@ -54,7 +54,9 @@
                                             })
                                         }}
                                         <div class="mt-m">
-                                            <p class="ta-r mb-n"><a data-fc-modules="toggle" href="#slug-{{ language }}" class="fz-default"><i class="icon-plus-circle"></i> {{ 'admin.category.field.slug.customize'|trans }}</a></p>
+                                            <p class="ta-r mb-n">
+                                                <a data-fc-modules="toggle" href="#slug-{{ language }}" class="fz-default">
+                                                    <i class="icon-plus-circle"></i> {{ 'admin.category.field.slug.customize'|trans }}</a></p>
                                         </div>
                                         <div id="slug-{{ language }}" class="grid pt-s hidden">
                                             <summary class="pl-l mb-n"></summary>
@@ -65,7 +67,7 @@
                                                         placeholder: 'admin.category.field.slug.placeholder',
                                                         'data-fc-modules': 'slug',
                                                         'data-fc-parent': form.name["#{language}_name"].vars.id,
-                                                        'pattern' : '^[a-z0-9-]+$'
+                                                        'pattern' : '^[a-z0-9\-]+$'
                                                     }
                                                 })
                                             }}

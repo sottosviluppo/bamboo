@@ -22,11 +22,11 @@ class NotFoundRedirectEventListener
     public function onKernelException(GetResponseForExceptionEvent $event)
     {
         $exception = $event->getException();
-        file_put_contents(
-            '/var/www/clients/client1/web26/private/404_debug.log',
-            date('Y-m-d H:i:s').' ['.get_class($exception).'] '.$exception->getMessage()."\n",
-            FILE_APPEND
-        );
+        // file_put_contents(
+        //     '/var/www/clients/client1/web26/private/404_debug.log',
+        //     date('Y-m-d H:i:s').' ['.get_class($exception).'] '.$exception->getMessage()."\n",
+        //     FILE_APPEND
+        // );
 
         if (
             !($exception instanceof NotFoundHttpException)
